@@ -1994,7 +1994,7 @@ function! s:Blame(bang,line1,line2,count,args) abort
     if s:buffer().commit() =~# '\D\|..'
       let cmd += [s:buffer().commit()]
     else
-      let cmd += ['--contents', '-']
+      let cmd += ['-e', '--contents', '-']
     endif
     let cmd += ['--', s:buffer().path()]
     let basecmd = escape(call(s:repo().git_command,cmd,s:repo()),'!%#')
@@ -2061,6 +2061,8 @@ function! s:Blame(bang,line1,line2,count,args) abort
         if exists('+cursorbind')
           setlocal cursorbind
         endif
+        " Trim blame output down to email-username only
+        :%s/^.\{-}(<\(\S\{-}\)@.*$/\1/ge
         setlocal nomodified nomodifiable nonumber scrollbind nowrap foldcolumn=0 nofoldenable winfixwidth filetype=fugitiveblame
         if exists('+concealcursor')
           setlocal concealcursor=nc conceallevel=2
@@ -2068,7 +2070,9 @@ function! s:Blame(bang,line1,line2,count,args) abort
         if exists('+relativenumber')
           setlocal norelativenumber
         endif
-        execute "vertical resize ".(s:linechars('.\{-\}\ze\s\+\d\+)')+1)
+        " Resize to fit contents
+        let longest = max(map(range(1, line('$')), "virtcol([v:val, '$'])"))
+        execute "vertical resize ".longest
         nnoremap <buffer> <silent> <F1> :help fugitive-:Gblame<CR>
         nnoremap <buffer> <silent> g?   :help fugitive-:Gblame<CR>
         nnoremap <buffer> <silent> q    :exe substitute(bufwinnr(b:fugitive_blamed_bufnr).' wincmd w<Bar>'.bufnr('').'bdelete','^-1','','')<CR>
