@@ -2062,7 +2062,7 @@ function! s:Blame(bang,line1,line2,count,args) abort
           setlocal cursorbind
         endif
         " Trim blame output down to email-username only
-        :%s/^.\{-}(<\(\S\{-}\)@.*$/\1/ge
+        :%s/^.\{-}(<\(\S\{-}\)[@>].*$/\1/ge
         setlocal nomodified nomodifiable nonumber scrollbind nowrap foldcolumn=0 nofoldenable winfixwidth filetype=fugitiveblame
         if exists('+concealcursor')
           setlocal concealcursor=nc conceallevel=2
